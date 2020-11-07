@@ -7,8 +7,10 @@ verify_ssl = true
 
 [packages]
 rembg = "*"
-celery = {extras = ["redis"], version = "*"}
+celery = {extras = ["pytest"], version = "*"}
 aiogram = "*"
+pytest = "*"
+pytest-celery = "*"
 
 [requires]
 python_version = "3.8"
