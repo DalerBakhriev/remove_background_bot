@@ -1,9 +1,12 @@
 import logging
+import os
 
 from celery import Celery
 from rembg.bg import remove
 
-app = Celery("task", broker="redis://localhost", backend="rpc://")
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost")
+
+app = Celery("task", broker=REDIS_URL, backend="rpc://")
 app.config_from_object("celery_config")
 
 
