@@ -6,17 +6,21 @@ import threading
 import time
 
 from aiogram import Bot, Dispatcher, executor, types
+from typing import List, Union
 
 from task import remove_image_background
 
 API_TOKEN = os.getenv("TELEGRAM_API_TOKEN", "")
 WAITING_FOR_CELERY_TO_START_TIME_SEC = 10
+TASK_TIMEOUT_SEC = 20
+CELERY_START_COMMAND = "celery --app task worker --events --pool solo --loglevel WARNING"
+
 
 bot = Bot(token=API_TOKEN)
 dispatcher = Dispatcher(bot)
 
 
-def start_celery(cmd: str):
+def start_celery(cmd: Union[str, List[str]]):
     subprocess.run(cmd, shell=True)
 
 
@@ -41,17 +45,24 @@ async def send_image_with_removed_background(message: types.Message):
     :param message: message from user (uploaded photo)
     """
 
-    logging.info("Got photo from user")
+    logging.info(
+        "Got photo from user with user name: %s, first name: %s, last name: %s",
+        message.from_user.username,
+        message.from_user.first_name,
+        message.from_user.last_name
+    )
     photo_buffer = io.BytesIO()
-    logging.info("Uploading photo...")
     await message.photo[-1].download(photo_buffer)
-    logging.info("Successfully uploaded photo...")
     photo_buffer.seek(0)
     photo = photo_buffer.read()
 
-    logging.info("Sending task to celery")
     remove_photo_background_task = remove_image_background.delay(photo)
-    await message.reply_photo(remove_photo_background_task.get())
+    await message.reply_photo(remove_photo_background_task.get(timeout=TASK_TIMEOUT_SEC))
+    logging.info(
+        "Successfully sent photo with removed background to user %s %s",
+        message.from_user.first_name,
+        message.from_user.last_name
+    )
 
 if __name__ == "__main__":
     logging.basicConfig(
@@ -61,7 +72,7 @@ if __name__ == "__main__":
     )
     celery_start_thread = threading.Thread(
         target=start_celery,
-        args=("celery --app task worker --events --pool solo --loglevel WARNING", )
+        args=(CELERY_START_COMMAND, )
     )
     logging.info("Starting celery...")
     celery_start_thread.start()
