@@ -20,7 +20,7 @@ bot = Bot(token=API_TOKEN)
 dispatcher = Dispatcher(bot)
 
 
-def start_celery(cmd: Union[str, List[str]]):
+def run_command(cmd: Union[str, List[str]]):
     subprocess.run(cmd, shell=True)
 
 
@@ -71,7 +71,7 @@ if __name__ == "__main__":
         level=logging.INFO
     )
     celery_start_thread = threading.Thread(
-        target=start_celery,
+        target=run_command,
         args=(CELERY_START_COMMAND, )
     )
     logging.info("Starting celery...")

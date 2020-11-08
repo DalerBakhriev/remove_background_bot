@@ -7,7 +7,7 @@ from rembg.bg import remove
 import multiprocessing
 from task import remove_image_background
 import time
-from bot import CELERY_START_COMMAND, start_celery
+from bot import CELERY_START_COMMAND, run_command
 
 import pytest
 
@@ -62,7 +62,7 @@ def image_for_test():
 @pytest.fixture(scope="function")
 def celery_image_app():
     celery_start_process = multiprocessing.Process(
-        target=start_celery,
+        target=run_command,
         args=(CELERY_START_COMMAND,)
     )
     celery_start_process.start()
