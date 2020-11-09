@@ -5,7 +5,6 @@ from celery import Celery
 from rembg.bg import remove
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost")
-logging.info("Redis url is %s", REDIS_URL)
 
 app = Celery("task", broker=REDIS_URL, backend="rpc://")
 app.config_from_object("celery_config")

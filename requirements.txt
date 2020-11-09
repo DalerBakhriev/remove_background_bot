@@ -1,3 +1,4 @@
+-f https://download.pytorch.org/whl/torch_stable.html
 aiogram==2.10.1
 aiohttp==3.7.2
 amqp==5.0.1
@@ -49,8 +50,8 @@ scipy==1.5.2
 six==1.15.0
 tifffile==2020.10.1
 toml==0.10.2
-torch==1.6.0
-torchvision==0.7.0
+torch==1.6.0+cpu
+torchvision==0.7.0+cpu
 tqdm==4.48.2
 typing-extensions==3.7.4.3
 urllib3==1.25.11
