@@ -13,7 +13,7 @@ from task import remove_image_background
 API_TOKEN = os.getenv("TELEGRAM_API_TOKEN", "")
 WAITING_FOR_CELERY_TO_START_TIME_SEC = 10
 TASK_TIMEOUT_SEC = 20
-CELERY_START_COMMAND = "celery --app task worker --events --pool solo --loglevel WARNING"
+CELERY_START_COMMAND = "celery --app task worker --events --pool eventlet --loglevel WARNING"
 
 
 bot = Bot(token=API_TOKEN)
