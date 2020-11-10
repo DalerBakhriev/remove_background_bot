@@ -91,6 +91,6 @@ def test_remove_background_task(celery_image_app, image_for_test):
 
     remove_image_background_task = remove_image_background.delay(image_for_test)
     result_from_celery = remove_image_background_task.get(timeout=5)
-    result = remove(image_for_test).tobytes()
+    result = remove(image_for_test, model_name="u2netp").tobytes()
     assert result_from_celery == result
 
