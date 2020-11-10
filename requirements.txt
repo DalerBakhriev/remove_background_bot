@@ -1,3 +1,4 @@
+-f https://download.pytorch.org/whl/torch_stable.html
 aiogram==2.10.1
 aiohttp==3.7.2
 amqp==5.0.1
