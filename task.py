@@ -4,7 +4,7 @@ import os
 from celery import Celery
 from rembg.bg import remove
 
-REDIS_URL = os.getenv("FLY_REDIS_CACHE_URL", "redis://localhost")
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost")
 
 app = Celery("task", broker=REDIS_URL, backend="rpc://")
 app.config_from_object("celery_config")
