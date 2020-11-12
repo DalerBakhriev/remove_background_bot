@@ -2,16 +2,26 @@ import io
 import logging
 import os
 import subprocess
-from rembg.bg import remove
+import threading
+import time
 
 from aiogram import Bot, Dispatcher, executor, types
+from typing import List, Union
 
+from task import remove_image_background
 
 API_TOKEN = os.getenv("TELEGRAM_API_TOKEN", "")
+WAITING_FOR_CELERY_TO_START_TIME_SEC = 10
+TASK_TIMEOUT_SEC = 20
+CELERY_START_COMMAND = "celery --app task worker --events --pool eventlet --loglevel WARNING"
 
 
 bot = Bot(token=API_TOKEN)
 dispatcher = Dispatcher(bot)
+
+
+def run_command(cmd: Union[str, List[str]]):
+    subprocess.run(cmd, shell=True)
 
 
 @dispatcher.message_handler(commands=["start", "help"])
@@ -46,8 +56,8 @@ async def send_image_with_removed_background(message: types.Message):
     photo_buffer.seek(0)
     photo = photo_buffer.read()
 
-    photo_with_removed_background = remove(photo).tobytes()
-    await message.reply_photo(photo_with_removed_background)
+    remove_photo_background_task = remove_image_background.delay(photo)
+    await message.reply_photo(remove_photo_background_task.get(timeout=TASK_TIMEOUT_SEC))
     logging.info(
         "Successfully sent photo with removed background to user %s %s",
         message.from_user.first_name,
@@ -60,6 +70,14 @@ if __name__ == "__main__":
         datefmt="%Y.%m.%d %H:%M:%S",
         level=logging.INFO
     )
+    celery_start_thread = threading.Thread(
+        target=run_command,
+        args=(CELERY_START_COMMAND, )
+    )
+    logging.info("Starting celery...")
+    celery_start_thread.start()
+    logging.info("Waiting Celery to start for %d seconds", WAITING_FOR_CELERY_TO_START_TIME_SEC)
+    time.sleep(WAITING_FOR_CELERY_TO_START_TIME_SEC)
 
     logging.info("Starting telegram bot application")
     executor.start_polling(dispatcher, skip_updates=True)
