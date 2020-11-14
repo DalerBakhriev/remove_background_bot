@@ -13,8 +13,8 @@ from task import remove_image_background
 os.environ["LRU_CACHE_CAPACITY"] = "1"  # pytorch reduce cache usage to avoid memory overhead
 API_TOKEN = os.getenv("TELEGRAM_API_TOKEN", "")
 WAITING_FOR_CELERY_TO_START_TIME_SEC = 10
-TASK_TIMEOUT_SEC = 20
-CELERY_START_COMMAND = "celery --app task worker --events --pool solo --loglevel INFO"
+TASK_TIMEOUT_SEC = 60
+CELERY_START_COMMAND = "celery --app task worker --events --pool solo --loglevel ERROR"
 
 
 bot = Bot(token=API_TOKEN)
@@ -65,6 +65,7 @@ async def send_image_with_removed_background(message: types.Message):
         message.from_user.last_name
     )
     photo_buffer.close()
+
 
 if __name__ == "__main__":
     logging.basicConfig(

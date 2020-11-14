@@ -4,9 +4,9 @@ import os
 from celery import Celery
 from background_remover.bg import remove
 
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost")
+RABBIT_URL = os.getenv("CLOUDAMQP_URL", "amqp://")
 
-app = Celery("task", broker=REDIS_URL, backend="rpc://")
+app = Celery("task", broker=RABBIT_URL, backend="rpc://")
 app.config_from_object("celery_config")
 
 
