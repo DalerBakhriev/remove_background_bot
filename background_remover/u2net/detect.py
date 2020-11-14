@@ -1,6 +1,5 @@
-import errno
 import os
-import sys
+import gc
 
 import numpy as np
 import requests
@@ -53,18 +52,9 @@ def load_model(model_name: str = "u2net"):
             "1ao1ovG1Qtx4b7EoskHXmi2E9rp5CHLcZ", path
         )
     else:
-        print("Choose between u2net or u2netp", file=sys.stderr)
+        raise ValueError("Choose between u2net or u2netp")
 
-    try:
-        if torch.cuda.is_available():
-            net.load_state_dict(torch.load(path))
-            net.to(torch.device("cuda"))
-        else:
-            net.load_state_dict(torch.load(path, map_location="cpu",))
-    except FileNotFoundError:
-        raise FileNotFoundError(
-            errno.ENOENT, os.strerror(errno.ENOENT), model_name + ".pth"
-        )
+    net.load_state_dict(torch.load(path, map_location="cpu",))
 
     net.eval()
 
@@ -107,16 +97,8 @@ def predict(net, item):
     sample = preprocess(item)
 
     with torch.no_grad():
-
-        if torch.cuda.is_available():
-            inputs_test = torch.cuda.FloatTensor(
-                sample["image"].unsqueeze(0).cuda().float()
-            )
-        else:
-            inputs_test = torch.FloatTensor(sample["image"].unsqueeze(0).float())
-
+        inputs_test = torch.FloatTensor(sample["image"].unsqueeze(0).float())
         d1, d2, d3, d4, d5, d6, d7 = net(inputs_test)
-
         pred = d1[:, 0, :, :]
         predict = norm_pred(pred)
 
@@ -125,5 +107,6 @@ def predict(net, item):
         img = Image.fromarray(predict_np * 255).convert("RGB")
 
         del d1, d2, d3, d4, d5, d6, d7, pred, predict, predict_np, inputs_test, sample
+        gc.collect()
 
-        return img
+    return img

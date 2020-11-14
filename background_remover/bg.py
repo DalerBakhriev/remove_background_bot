@@ -22,6 +22,7 @@ def get_model(model_name):
 
 
 def remove(data: bytes, model_name: str = "u2net") -> bytes:
+
     model = get_model(model_name)
     img = Image.open(io.BytesIO(data)).convert("RGB")
     mask = detect.predict(model, np.array(img)).convert("L")
@@ -31,4 +32,7 @@ def remove(data: bytes, model_name: str = "u2net") -> bytes:
     bio = io.BytesIO()
     cutout.save(bio, "PNG")
 
-    return bio.getbuffer().tobytes()
+    processed_img = bio.getbuffer().tobytes()
+    bio.close()
+
+    return processed_img

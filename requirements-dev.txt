@@ -1,2 +1,3 @@
 pytest==6.1.2
 pytest-celery==0.0.0a1
+filprofiler-0.10.0
