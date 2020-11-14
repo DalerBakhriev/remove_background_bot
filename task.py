@@ -2,7 +2,7 @@ import logging
 import os
 
 from celery import Celery
-from rembg.bg import remove
+from background_remover.bg import remove
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost")
 
@@ -23,5 +23,4 @@ def remove_image_background(image: bytes) -> bytes:
     image_with_removed_background = remove(image, model_name="u2netp")
     logging.info("Successfully removed background")
 
-    return image_with_removed_background.tobytes()
-
+    return image_with_removed_background

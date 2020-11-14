@@ -2,7 +2,7 @@ import hashlib
 import random
 import string
 from typing import Dict, Union
-from rembg.bg import remove
+from background_remover.bg import remove
 
 import multiprocessing
 from task import remove_image_background
