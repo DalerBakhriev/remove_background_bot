@@ -38,6 +38,23 @@ async def send_welcome(message: types.Message):
     )
 
 
+async def get_photo(message: types.Message) -> bytes:
+
+    """
+    Gets photo from telegram message
+    :param message: telegram meessage object
+    :return: photo in bytes format
+    """
+
+    photo_buffer = io.BytesIO()
+    await message.photo[-1].download(photo_buffer)
+    photo_buffer.seek(0)
+    photo = photo_buffer.read()
+    photo_buffer.close()
+
+    return photo
+
+
 @dispatcher.message_handler(content_types=["photo"])
 async def send_image_with_removed_background(message: types.Message):
 
@@ -52,10 +69,8 @@ async def send_image_with_removed_background(message: types.Message):
         message.from_user.first_name,
         message.from_user.last_name
     )
-    photo_buffer = io.BytesIO()
-    await message.photo[-1].download(photo_buffer)
-    photo_buffer.seek(0)
-    photo = photo_buffer.read()
+
+    photo = await get_photo(message)
 
     remove_photo_background_task = remove_image_background.delay(photo)
     await message.reply_photo(remove_photo_background_task.get(timeout=TASK_TIMEOUT_SEC))
@@ -64,7 +79,6 @@ async def send_image_with_removed_background(message: types.Message):
         message.from_user.first_name,
         message.from_user.last_name
     )
-    photo_buffer.close()
 
 
 if __name__ == "__main__":
